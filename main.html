@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>使用blod对象实现拖拽</title>
+    <style type="text/css">
+        #content{
+            width:300px;
+            height:350px;
+            border: 1px dashed red;
+        }
+        #output{
+            width:300px;
+            text-align: center;
+        }
+        img{
+            width: 300px;
+            height: 300px;
+        }
+        #oppaccid{
+            margin-top: 10px;
+            color: #999999;
+            width: 200px;
+            height: 30px;
+            font-size: 15px;
+            text-indent: 15px;
+            margin-right: 40px;
+        }
+    </style>
+    <script src="sdk/NIM_Web_NIM_v7.6.0.js"></script>
+    <script src="js/md5.js"></script>
+    <script src="httpsPost/jQuery.js"></script>
+    <script src="httpsPost/MD5.js"></script>
+    <script src="httpsPost/SHA1.js"></script>
+    <script src="js/util.js"></script>
+</head>
+<body>
+<h3>拖拽文件进入</h3>
+<div><input name="oppaccid" type="text" id="oppaccid" value="请输入对方的accid" size="40"/></div>
+<div id="content"></div>
+<!-- 放下 文字 -->
+<div id="output">
+
+</div>
+<script type="text/javascript">
+    var content =document.getElementById("content");
+    var output =document.getElementById("output");
+    var inputAccid = document.getElementById("oppaccid");       // 输入对方的accid框
+    var base64data;
+    var reader = new FileReader();
+    var defaultValue = "请输入对方的accid";
+
+    // let app_key = '4727023efa991d31d61b3b32e819bd5b';
+    // let app_secret = '';
+    // let nonce = '12345';
+    // let curTime = Math.floor(new Date().getTime()/1000);
+    // let checkSum = SHA1(app_secret + nonce + curTime);
+
+    inputAccid.onclick = function (){
+        if(inputAccid.value === defaultValue){
+            inputAccid.value='';
+            this.style.color='#000'
+        }
+    };
+
+    inputAccid.onblur = function () {
+        console.log(inputAccid.value);
+        if(!inputAccid.value || inputAccid.value === ''){
+            inputAccid.value = defaultValue;
+            this.style.color='#999'
+        }
+    };
+
+    content.ondragover=function(e){
+        e.preventDefault();
+        this.style.overflow="auto"
+    };
+    content.ondrop=function(e){
+        e.preventDefault();
+        var files = e.dataTransfer.files;
+        for(var i=0;i<files.length;i++){
+            var  fileList=files[i];
+
+            // 使用blod转base64，通过ajax上传服务端api
+            // if (fileList.size < 15*1024*1024) {
+            //     upLoadFileByApi(fileList)
+            // }else {
+            //     output.innerHTML="<p>"+"文件大于15Mb，无法通过api发送"+"<br></p>";
+            // }
+
+            // 发送文件消息（可选）
+            doSendFile(fileList);
+
+            // 打印文件信息
+            var lastModifiedDate = fileList.lastModifiedDate;
+            var lastDate=lastModifiedDate.toLocaleString();
+            output.innerHTML+="<p>"+fileList.name+"<br>"+fileList.type+"<br>大小:"+fileList.size+"<br>"+lastDate+"<br></p>"
+
+        }
+    };
+
+    var nim = NIM.getInstance({
+        debug: true,   // 是否开启日志，将其打印到console。集成开发阶段建议打开。
+        appKey: '45c6af3c98409b18a84451215d0bdd6e',
+        account: readCookie("accid"),
+        token: readCookie("token"),
+        db:true, //若不要开启数据库请设置false。SDK默认为true。
+        onconnect: onConnect,
+    });
+
+    function onConnect(){
+    }
+
+    function doSendFile(fileList) {
+
+        var to = inputAccid.value;
+        if (to === '请输入对方的accid'){
+            alert("请输入对方的accid！");
+            return;
+        }
+        nim.sendFile({
+            scene: 'p2p',
+            to: to,
+            blob: fileList,
+            // fastPass: '{"w":200,"h":110,"md5":"xxxxxxxxx"}',
+            beginupload: function(upload) {
+                // - 如果开发者传入 fileInput, 在此回调之前不能修改 fileInput
+                // - 在此回调之后可以取消图片上传, 此回调会接收一个参数 `upload`, 调用 `upload.abort();` 来取消文件上传
+            },
+            uploadprogress: function(obj) {
+                console.log('文件总大小: ' + obj.total + 'bytes');
+                console.log('已经上传的大小: ' + obj.loaded + 'bytes');
+                console.log('上传进度: ' + obj.percentage);
+                console.log('上传进度文本: ' + obj.percentageText);
+            },
+            uploaddone: function(error, file) {
+                console.log(error);
+                console.log(file);
+                console.log('上传' + (!error?'成功':'失败'));
+            },
+            beforesend: function(msg) {
+                console.log('正在发送p2p image消息, id=' + msg.idClient);
+            },
+            done: sendMsgDone
+        });
+    }
+
+    function sendMsgDone(error, msg) {
+        console.log(error);
+        console.log(msg);
+        console.log('发送' + msg.scene + ' ' + msg.type + '消息' + (!error?'成功':'失败') + ', id=' + msg.idClient);
+    }
+
+    function upLoadFileByApi(fileList) {
+        reader.readAsDataURL(fileList);
+        reader.onloadend = function() {
+            base64data = reader.result;
+            console.log(base64data);
+            $.ajax({
+                url: 'https://api.netease.im/nimserver/msg/upload.action',
+                type: 'POST',
+                headers:{'Content-Type':'application/x-www-form-urlencoded;charset=utf-8','AppKey':app_key,"Nonce":nonce,"CurTime":curTime,"CheckSum":checkSum},
+                data : {"content":base64data.substring(base64data.indexOf(',')+1),"ishttps":"true"},
+                // dataType: 'json',
+                success: function (data) {
+                    console.log('111111111111111111111',data.url);
+                    if (data.code === 200) {
+                        console.log('上传成功，url is ',data.url);
+                        output.innerHTML += "<p>"+"上传服务端api成功"+"<br>"+"，返回url："+data.url+"<br></p>"
+                    } else {
+
+                    }
+                }
+            });
+        };
+    }
+
+
+
+</script>
+</body>
+</html>

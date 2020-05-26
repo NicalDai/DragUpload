@@ -1,0 +1,238 @@
+body {
+	background-color: #282828;
+	padding: 3rem;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.mainwrapper{
+	width: 1000px;
+	height: 600px;
+	left: 50%;
+	top: 50%;
+	position: absolute;
+	margin-left: -500px;
+	margin-top: -300px;
+}
+
+.toolbar {
+	left: 50%;
+	top: 50%;
+	position: absolute;
+	margin-top: 280px;
+	margin-left: -100px;
+}
+
+
+.btn {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+	padding: 1rem 2rem;
+	background-color: #005db9;
+	color: #fff;
+	border: 0;
+	transition: all 200ms ease;
+	margin-left: 5px;
+	font-size: 15px;
+}
+.btn.btn-round {
+	border-radius: 10px;
+}
+.btn:focus {
+	outline: none;
+}
+.btn:active {
+	box-shadow: inset 0 0 0 1000px rgba(0,0,0,0.1);
+}
+
+.btn-blue {
+	background-color: #005db9;
+	font-size: 15px;
+}
+.btn-red {
+	background-color: #ad0052;
+	font-size: 15px;
+}
+.btn-green {
+	background-color: #00947e;
+}
+.btn-black {
+	background-color: #444;
+}
+
+.btn-border {
+	display: inline-block;
+	margin: 5px;
+}
+.btn-border	.btn {
+	display: block;
+	margin: 2px;
+}
+
+.btn-border.btn-round {
+	border-radius: 10px;
+}
+.btn-border.btn-round .btn {
+	border-radius: 10px;
+}
+
+.box{
+	width: 1000px;
+	height: 500px;
+	padding: 0.5rem;
+	position: absolute;
+	display: flex;
+	background-color: #4f4f4f;
+}
+.box>div:nth-child(1){
+	flex: 1;
+	display: flex;
+	flex-direction: row
+}
+.box>div:nth-child(2){
+	flex: 1;
+	display: flex;
+	flex-direction: row
+}
+
+#LocalContainer1{
+	position:relative;
+	flex: 1;
+	background-color: black;
+	color:black;
+	justify-content: center;
+	margin-right: 0.5rem;
+}
+
+#Remotecontainer1{
+	display: flex;
+	flex: 1;
+	background-color:black;
+	color:black;
+	justify-content: center;
+	align-content: flex-start;
+	flex-direction: column;
+}
+
+#Remotecontainer_wrap_1{
+	display: flex;
+	flex: 1;
+	background-color:#4f4f4f;
+	justify-content: center;
+	align-content: flex-start;
+	margin: 1px;
+}
+
+#Remotecontainer_wrap_2{
+	display: flex;
+	flex: 1;
+	background-color:#4f4f4f;
+	justify-content: center;
+	align-content: flex-start;
+	margin: 1px;
+}
+
+#Remotecontainer_1{
+	position:relative;
+	flex: 1;
+	background-color:black;
+	margin: 1px;
+	justify-content: center;
+}
+
+#Remotecontainer_2{
+	position:relative;
+	flex: 1;
+	background-color:black;
+	margin: 1px;
+	justify-content: center;
+}
+
+#Remotecontainer_3{
+	position:relative;
+	flex: 1;
+	background-color: black;;
+	margin: 1px;
+	justify-content: center;
+}
+
+#Remotecontainer_4{
+	position:relative;
+	flex: 1;
+	background-color:black;
+	margin: 1px;
+	justify-content: center;
+}
+
+#oppaccid{
+	margin-top: 10px;
+	color: #999999;
+	width: 200px;
+	height: 30px;
+	font-size: 15px;
+	text-indent: 15px;
+	margin-right: 40px;
+}
+
+#Remotecontainer_1_name{
+	display: none;
+	position:absolute;
+	top:10px;
+	left:10px;
+	color: white;
+}
+
+#Remotecontainer_2_name{
+	display: none;
+	position:absolute;
+	top:10px;
+	left:10px;
+	color: white;
+}
+
+#Remotecontainer_3_name{
+	display: none;
+	position:absolute;
+	top:10px;
+	left:10px;
+	color: white;
+}
+
+#Remotecontainer_4_name{
+	display: none;
+	position:absolute;
+	top:10px;
+	left:10px;
+	color: white;
+}
+#Localcontainer_0_name{
+	display: none;
+	position:absolute;
+	top:10px;
+	left:10px;
+	color: white;
+}
+
+#oppaccid{
+	margin-top: 10px;
+	color: #999999;
+	width: 200px;
+	height: 30px;
+	font-size: 15px;
+	text-indent: 15px;
+	margin-right: 40px;
+}
+.btn-logout {
+	width: 60px;
+	line-height: 30px;
+	background: #0888ff;
+	color: #fff;
+	font-size: 14px;
+}
+
+#drop_zone{
+	width: 300px;
+	height: 200px;
+	background: aqua;
+}
+
+
+
