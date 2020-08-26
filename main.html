@@ -3,12 +3,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>使用blod对象实现拖拽</title>
+    <title>云信发送文件消息测试</title>
     <style type="text/css">
         #content{
             width:300px;
             height:350px;
-            border: 1px dashed red;
+            border: 1px dashed darkblue;
+            margin-top: 20px;
         }
         #output{
             width:300px;
@@ -27,8 +28,35 @@
             text-indent: 15px;
             margin-right: 40px;
         }
+        .btn {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            padding: 0.5rem 2rem;
+            background-color: #005db9;
+            color: #fff;
+            border: 0;
+            transition: all 200ms ease;
+            margin-left: 5px;
+            font-size: 15px;
+            margin-top: 20px;
+            visibility: hidden;
+        }
+        .btn2 {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            padding: 0.5rem 2rem;
+            background-color: #ad0052;
+            color: #fff;
+            border: 0;
+            transition: all 200ms ease;
+            margin-left: 5px;
+            font-size: 15px;
+            margin-top: 20px;
+            visibility: hidden;
+        }
+        #content{
+            /*position: absolute;*/
+        }
     </style>
-    <script src="sdk/NIM_Web_NIM_v7.6.0.js"></script>
+    <script src="sdk/NIM_Web_NIM_v7.8.1.js"></script>
     <script src="js/md5.js"></script>
     <script src="httpsPost/jQuery.js"></script>
     <script src="httpsPost/MD5.js"></script>
@@ -36,9 +64,28 @@
     <script src="js/util.js"></script>
 </head>
 <body>
-<h3>拖拽文件进入</h3>
+<h3>发送文件消息测试</h3>
+<br /><br />
+<div id="currAccid">当前未登录！!</div>
 <div><input name="oppaccid" type="text" id="oppaccid" value="请输入对方的accid" size="40"/></div>
+<form id="TypeRadio" action="" method="get">
+    <br /><br />
+    请选择上传方式：<br /><br />
+    <label><input name="Type" type="radio" value="0" onclick="showDragArea()"/>拖拽上传Blob </label>
+    <label><input name="Type" type="radio" value="1" onclick="showDragArea()"/>拖拽上传dataURL </label>
+    <label><input name="Type" type="radio" value="2" onclick="showDragArea()"/>服务端api上传 </label>
+    <label><input name="Type" type="radio" value="3" onclick="showBtn()"/>input节点上传 </label>
+</form>
+
+<button class="btn" id="choseFile">
+    <label class="ui_button ui_button_primary" for="xFile">上传文件</label>
+    <form><input type="file" id="xFile" style="position:absolute;clip:rect(0 0 0 0);"></form>
+</button>
+
+<button class="btn2" id="sendFile">发送文件</button>
+
 <div id="content"></div>
+
 <!-- 放下 文字 -->
 <div id="output">
 
@@ -47,15 +94,35 @@
     var content =document.getElementById("content");
     var output =document.getElementById("output");
     var inputAccid = document.getElementById("oppaccid");       // 输入对方的accid框
+    var currAccid = document.getElementById("currAccid");
+
     var base64data;
     var reader = new FileReader();
     var defaultValue = "请输入对方的accid";
 
-    // let app_key = '4727023efa991d31d61b3b32e819bd5b';
-    // let app_secret = '';
-    // let nonce = '12345';
-    // let curTime = Math.floor(new Date().getTime()/1000);
-    // let checkSum = SHA1(app_secret + nonce + curTime);
+    let app_key = '请输入您自己应用的appkey';
+    let app_secret = '请输入您自己应用的appsecret';
+    let nonce = '12345';
+    let curTime = Math.floor(new Date().getTime()/1000);
+    let checkSum = SHA1(app_secret + nonce + curTime);
+
+    function showDragArea(){
+        console.log("展示拖拽界面");
+        document.getElementById("content").style.visibility = 'visible';
+        document.getElementById("choseFile").style.visibility = 'hidden';
+        document.getElementById("sendFile").style.visibility = 'hidden';
+    }
+
+    function showBtn(){
+        console.log("展示上传按钮");
+        document.getElementById("choseFile").style.visibility = 'visible';
+        document.getElementById("sendFile").style.visibility = 'visible';
+        document.getElementById("content").style.visibility = 'hidden';
+    }
+    // 发送按钮点击事件
+    document.getElementById("sendFile").onclick = function(){
+        sendFileInput(document.getElementById("xFile"));
+    };
 
     inputAccid.onclick = function (){
         if(inputAccid.value === defaultValue){
@@ -83,15 +150,32 @@
             var  fileList=files[i];
 
             // 使用blod转base64，通过ajax上传服务端api
-            // if (fileList.size < 15*1024*1024) {
-            //     upLoadFileByApi(fileList)
-            // }else {
-            //     output.innerHTML="<p>"+"文件大于15Mb，无法通过api发送"+"<br></p>";
-            // }
+            if (fileList.size < 15*1024*1024) {
 
-            // 发送文件消息（可选）
-            doSendFile(fileList);
-
+                if(!document.querySelector('[name="Type"]:checked')){
+                    alert("请选择发送类型！");
+                    return;
+                }
+                console.log(parseInt(document.querySelector('[name="Type"]:checked').value));
+                switch (parseInt(document.querySelector('[name="Type"]:checked').value)) {
+                    case 0:
+                        // 客户端web测试 Blob
+                        doSendFileBlob(fileList);
+                        break;
+                    case 1:
+                        // 客户端web测试 dataurl
+                        doSendFileDataUrl(fileList);
+                        break;
+                    case 2:
+                        // 服务端api上传
+                        doSendFileByApi(fileList);
+                        break;
+                    default:
+                        alert("请选择发送类型！");break;
+                }
+            }else {
+                output.innerHTML="<p>"+"文件大于15Mb，无法通过api发送"+"<br></p>";
+            }
             // 打印文件信息
             var lastModifiedDate = fileList.lastModifiedDate;
             var lastDate=lastModifiedDate.toLocaleString();
@@ -106,15 +190,32 @@
         account: readCookie("accid"),
         token: readCookie("token"),
         db:true, //若不要开启数据库请设置false。SDK默认为true。
+        autoMarkRead:false,
+        // privateConf:privateConf,
         onconnect: onConnect,
+        onsessions: onSessions,
+        onwillreconnect:onWillReconnect,
+        onmsg:onMsg,
+        onsysmsg:onSysMsg,
+        onDisconnect:onDisconnect,
+        onofflinemsgs:onOfflineMsgs,
+        /** 超大群相关  */
+        syncSuperTeams: true, // 是否同步超大群列表，默认为true
+        // onSuperTeams: onSuperTeams, // 同步超大群列表的回调, 会传入超大群数组
+        // onSyncCreateSuperTeam: onSyncCreateSuperTeam, // 当前登录者创建超大群后的回调
+        // onDismissSuperTeam: onDismissSuperTeam, // 超大群解散的回调, 所有群成员均会收到该回调
+        // onUpdateSuperTeamMember: onUpdateSuperTeamMember, // 群成员信息更新后的回调, 会传入超大群群成员对象, 不过此时的信息是不完整的, 只会包括被更新的字段。当前登录帐号在其它端修改自己在群里面的昵称时也会收到此回调
+        // onUpdateSuperTeam: onUpdateSuperTeam, // 更新超大群的回调
+        // onAddSuperTeamMembers: onAddSuperTeamMembers, // 新成员入超大群的回调
+        // onRemoveSuperTeamMembers: onRemoveSuperTeamMembers // 有人离开（被踢或主动离开）超大群的回调
     });
 
-    function onConnect(){
+    function onSysMsg(sysMsg) {
+        console.log('收到系统通知', sysMsg);
     }
 
-    function doSendFile(fileList) {
-
-        var to = inputAccid.value;
+    function sendFileInput(fileInput) {
+        let to = inputAccid.value;
         if (to === '请输入对方的accid'){
             alert("请输入对方的accid！");
             return;
@@ -122,7 +223,7 @@
         nim.sendFile({
             scene: 'p2p',
             to: to,
-            blob: fileList,
+            fileInput:fileInput,
             // fastPass: '{"w":200,"h":110,"md5":"xxxxxxxxx"}',
             beginupload: function(upload) {
                 // - 如果开发者传入 fileInput, 在此回调之前不能修改 fileInput
@@ -140,19 +241,95 @@
                 console.log('上传' + (!error?'成功':'失败'));
             },
             beforesend: function(msg) {
-                console.log('正在发送p2p image消息, id=' + msg.idClient);
+                console.log('正在发送p2p image消息' ,msg);
             },
             done: sendMsgDone
         });
     }
 
+
+    function doSendFileBlob(fileList) {
+        var to = inputAccid.value;
+        if (to === '请输入对方的accid'){
+            alert("请输入对方的accid！");
+            return;
+        }
+        console.log(base64data);
+        nim.sendFile({
+            scene: 'p2p',
+            to: to,
+            blob: fileList,
+            beginupload: function(upload) {
+                // - 如果开发者传入 fileInput, 在此回调之前不能修改 fileInput
+                // - 在此回调之后可以取消图片上传, 此回调会接收一个参数 `upload`, 调用 `upload.abort();` 来取消文件上传
+            },
+            uploadprogress: function(obj) {
+                console.log('文件总大小: ' + obj.total + 'bytes');
+                console.log('已经上传的大小: ' + obj.loaded + 'bytes');
+                console.log('上传进度: ' + obj.percentage);
+                console.log('上传进度文本: ' + obj.percentageText);
+            },
+            uploaddone: function(error, file) {
+                console.log(error);
+                console.log(file);
+                console.log('上传' + (!error?'成功':'失败'));
+            },
+            beforesend: function(msg) {
+                console.log('正在发送p2p image消息' ,msg);
+            },
+            done: sendMsgDone
+        });
+
+    }
+
+    function doSendFileDataUrl(fileList) {
+        var to = inputAccid.value;
+        if (to === '请输入对方的accid'){
+            alert("请输入对方的accid！");
+            return;
+        }
+        reader.readAsDataURL(fileList);
+        reader.onloadend = function() {
+            base64data = reader.result;
+            console.log(base64data);
+            nim.sendFile({
+                scene: 'p2p',
+                to: to,
+                // blob: fileList,
+                dataURL: base64data,
+                // fastPass: '{"w":200,"h":110,"md5":"xxxxxxxxx"}',
+                beginupload: function(upload) {
+                    // - 如果开发者传入 fileInput, 在此回调之前不能修改 fileInput
+                    // - 在此回调之后可以取消图片上传, 此回调会接收一个参数 `upload`, 调用 `upload.abort();` 来取消文件上传
+                },
+                uploadprogress: function(obj) {
+                    console.log('文件总大小: ' + obj.total + 'bytes');
+                    console.log('已经上传的大小: ' + obj.loaded + 'bytes');
+                    console.log('上传进度: ' + obj.percentage);
+                    console.log('上传进度文本: ' + obj.percentageText);
+                },
+                uploaddone: function(error, file) {
+                    console.log(error);
+                    console.log(file);
+                    console.log('上传' + (!error?'成功':'失败'));
+                },
+                beforesend: function(msg) {
+                    console.log('正在发送p2p image消息' ,msg);
+                },
+                done: sendMsgDone
+            });
+
+        };
+
+    }
+
     function sendMsgDone(error, msg) {
         console.log(error);
         console.log(msg);
-        console.log('发送' + msg.scene + ' ' + msg.type + '消息' + (!error?'成功':'失败') + ', id=' + msg.idClient);
+        console.log('发送' + msg.scene + ' ' + msg.type + '消息' + (!error?'成功':'失败') + ', ',msg);
     }
 
-    function upLoadFileByApi(fileList) {
+    function doSendFileByApi(fileList) {
         reader.readAsDataURL(fileList);
         reader.onloadend = function() {
             base64data = reader.result;
@@ -177,6 +354,39 @@
     }
 
 
+    function onWillReconnect(obj) {
+        // 此时说明 SDK 已经断开连接, 请开发者在界面上提示用户连接已断开, 而且正在重新建立连接
+        console.log('即将重连');
+        console.log(obj.retryCount);
+        console.log(obj.duration);
+    }
+    function onDisconnect(error) {
+        // 此时说明 SDK 处于断开状态, 开发者此时应该根据错误码提示相应的错误信息, 并且跳转到登录页面
+        console.log('丢失连接');
+        console.log(error);
+    }
+
+    function onError(error) {
+        console.log(error);
+    }
+
+    function onOfflineMsgs(msg) {
+        console.log("收到离线消息： ",msg);
+        console.log("离线消息数组",msg.msgs);
+        nim.markMsgRead(msg.msgs);
+    }
+
+    function onMsg(msg) {
+        console.log("收到消息",msg);
+    }
+
+    function onSessions(sessions) {
+        console.log('收到会话列表', sessions);
+    }
+
+    function onConnect(){
+        currAccid.innerText = "当前登录账号："+readCookie("accid");
+    }
 
 </script>
 </body>
